@@ -1,0 +1,101 @@
+<project name="bookstore-prototype" default="build">
+	<property name="src.dir" location="src/main/java" />
+	<property name="src.gen.dir" location="src/main/gen" />
+	<property name="resources.dir" location="src/main/resources" />
+	<property name="build.dir" location="target" />
+	<property name="app.classes.dir" location="${build.dir}/classes" />
+	<property name="test.classes.dir" location="${build.dir}/test-classes" />
+	<property name="test.dir" location="src/test/java" />
+	<property name="lib.dir" location="lib" />
+
+	<path id="app.lib.path">
+		<fileset dir="${lib.dir}/deploy" includes="*.jar" />
+	</path>
+
+	<path id="test.lib.path">
+		<fileset dir="${lib.dir}/develop" includes="*.jar" excludes="*-src.jar" />
+		<path location="${app.classes.dir}" />
+		<path refid="app.lib.path" />
+	</path>
+
+	<target name="clean">
+		<delete dir="${build.dir}" quiet="true" />
+		<delete dir="${src.gen.dir}" quiet="true" />
+	</target>
+
+	<target name="gen.compile" depends="generate">
+		<mkdir dir="${app.classes.dir}" />
+		<javac destdir="${app.classes.dir}" srcdir="${src.gen.dir}" classpathref="app.lib.path" debug="on" includeantruntime="no" />
+	</target>
+
+	<target name="app.compile" depends="gen.compile">
+		<property name="app.src.dir" location="${src.dir}" />
+		<mkdir dir="${app.classes.dir}" />
+		<javac destdir="${app.classes.dir}" srcdir="${app.src.dir}" classpathref="app.lib.path" debug="on" includeantruntime="no" />
+	</target>
+
+	<target name="test.compile" depends="app.compile">
+		<property name="test.src.dir" location="${test.dir}" />
+		<mkdir dir="${test.classes.dir}" />
+		<javac destdir="${test.classes.dir}" srcdir="${test.src.dir}" classpathref="test.lib.path" debug="on" includeantruntime="no" />
+	</target>
+
+	<target name="unittest.run" description="Run the tests" depends="test.compile">
+		<property name="test.reports.dir" location="${build.dir}/testreports" />
+		<mkdir dir="${test.reports.dir}" />
+		<junit>
+			<batchtest todir="${test.reports.dir}" haltonfailure="true" haltonerror="true">
+				<formatter type="plain" />
+				<fileset dir="${test.dir}/unit" includes="**/*Test.java" />
+			</batchtest>
+			<classpath>
+				<path refid="test.lib.path" />
+				<path location="${test.classes.dir}" />
+			</classpath>
+		</junit>
+	</target>
+
+	<target name="integrationtest.run" description="Run the tests" depends="test.compile">
+		<property name="test.reports.dir" location="${build.dir}/testreports" />
+		<mkdir dir="${test.reports.dir}" />
+		<junit>
+			<batchtest todir="${test.reports.dir}" haltonfailure="true" haltonerror="true">
+				<formatter type="plain" />
+				<fileset dir="${test.dir}/unit" includes="**/*Test.java" />
+			</batchtest>
+			<classpath>
+				<path refid="test.lib.path" />
+				<path location="${test.classes.dir}" />
+			</classpath>
+		</junit>
+	</target>
+
+	<target name="endtoendtest.run" description="Run the tests" depends="test.compile">
+		<property name="test.reports.dir" location="${build.dir}/testreports" />
+		<mkdir dir="${test.reports.dir}" />
+		<junit>
+			<batchtest todir="${test.reports.dir}" haltonfailure="true" haltonerror="true">
+				<formatter type="plain" />
+				<fileset dir="${test.dir}/end-to-end" includes="**/*Test.java" />
+			</batchtest>
+			<classpath>
+				<path refid="test.lib.path" />
+				<path location="${test.classes.dir}" />
+			</classpath>
+		</junit>
+	</target>
+
+	<target name="test.run" description="Run the tests" depends="unittest.run, integrationtest.run, endtoendtest.run" />
+	<target name="build" description="Clean, build, and full test" depends="clean, test.run" />
+
+	<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+		<classpath>
+			<path refid="app.lib.path" />
+		</classpath>
+	</taskdef>
+	<target name="generate">
+		<mkdir dir="${src.gen.dir}" />
+		<xjc schema="${resources.dir}/addressing.xsd" destdir="${src.gen.dir}" />
+	</target>
+
+</project>

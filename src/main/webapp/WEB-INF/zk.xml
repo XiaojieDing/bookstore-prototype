@@ -1,0 +1,23 @@
+<zk>
+	
+	<listener>
+		<listener-class>it.amattioli.guidate.init.ApplicationInit</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>it.amattioli.guidate.init.SessionInitAndCleanup</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>it.amattioli.guidate.init.DesktopInitAndCleanup</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>it.amattioli.guidate.init.PageInit</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>it.amattioli.guidate.init.EventCleanup</listener-class>
+	</listener>
+	
+</zk>
